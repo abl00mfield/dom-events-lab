@@ -18,17 +18,21 @@ calculator.addEventListener('click', handleClick);  // This listens for a click 
 
 /*-------------------------------- Functions --------------------------------*/
 
+function reset(displayText, answerFlag) {   // this function resets the display and operands
+    displayElement.innerText = displayText;
+    operand1 = '';
+    operand2 = '';
+    operator = null;
+    operatorClicked = false;
+    answerDisplayed = answerFlag;
+}
+
 function handleOperation(event) {
     console.log('operator clicked');
     console.log('operands: ', operand1, operator, operand2);
     console.log('operatorClickedFlag: ', operatorClicked);
     if (event.target.innerText === 'C') {   // if the clear button is clicked, clear the display
-        displayElement.innerText = '';
-        operand1 = '';
-        operand2 = '';
-        operator = null;
-        operatorClicked = false;
-        answerDisplayed = false;
+        reset('', true);
         return;
     }
     
@@ -53,7 +57,7 @@ function handleOperation(event) {
             operator = event.target.innerText;    // the operator is now the new operator
             operand2 = '';   // reset the second number
         } else {
-            operand1 = displayElement.innerText;
+            operand1 = displayElement.innerText;   //grab the first number
             console.log('operand1: ', operand1);
             
         }
@@ -83,22 +87,20 @@ function calculate() {   // this function calculates the answer
     return ans;
 }
 
-function countDigits(num) {
+function countDigits(num) {  // this function counts the number of digits in a number
     return num.toString().length;
 }
 
 function handleEqual() {
-    operand2 = displayElement.innerText;
+    console.log(operatorClicked);
+    if (!operatorClicked) {      //this flag indicates that they have clicked an operator, if they haven't, the second number is the display
+        operand2 = displayElement.innerText;   
+    }
     
-    if (operand1 && operator && operand2) {   //if all values are present, calculate the answer
-        displayElement.innerText = calculate();
-        operand1 = '';  //reset all values
-        operand2 = '';
-        operator = null;
-        answerDisplayed = true;
-        operatorClicked = false;
+    if (operand1 && operator && operand2) {   //if all values are present, calculate the answer and reset the display
+        reset(calculate(), true);
     } else {
-        displayElement.innerText = '';   //if they push the equal sign without all values, clear the display
+        return;     //just return if they haven't entered all values
     }
 }
 
@@ -107,32 +109,27 @@ function handleNumber(event) {
     console.log('operands: ', operand1, operator, operand2);
     console.log('operator selected: ', operatorClicked);
 
-    if (operatorClicked) {
+    if (operatorClicked || answerDisplayed) {  // if the operator has been clicked or answer just displayed clear the display
         displayElement.innerText = '';
         operatorClicked = false;
-    }
-    if (answerDisplayed) {
-        displayElement.innerText = '';
         answerDisplayed = false;
     }
-    if (displayElement.innerText.length < MAX_DIGITS) {
+   
+    if (displayElement.innerText.length < MAX_DIGITS) {   //make sure the number of digits will fit on screen
         displayElement.innerText += event.target.innerText;
     }
 }
 
 function handleClick(event) {
     if (event.target.classList.contains('number')) {
-        // operatorClicked = false;
         handleNumber(event);
     }
   
     if (event.target.classList.contains('operator')) {   //handle the operator
-        
         handleOperation(event);
     }
     
     if (event.target.classList.contains('equal')) {   //handle the equal sign
-        operatorClicked = false;
         handleEqual();
     }
 
